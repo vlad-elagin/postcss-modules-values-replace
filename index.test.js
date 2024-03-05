@@ -271,6 +271,22 @@ test('should replace inside media queries', async (t) => {
   );
 });
 
+test('should replace inside container queries', async (t) => {
+  await run(
+    t,
+    '@value base: 10px;\n@container (min-width: calc(base * 200)) {}',
+    '@value base: 10px;\n@container (min-width: calc(10px * 200)) {}',
+  );
+});
+
+test('should replace inside named container queries', async (t) => {
+  await run(
+    t,
+    '@value base: 10px;\n@container header (min-width: calc(base * 200)) {}',
+    '@value base: 10px;\n@container header (min-width: calc(10px * 200)) {}',
+  );
+});
+
 test('should allow custom-property-style names', async (t) => {
   await run(
     t,

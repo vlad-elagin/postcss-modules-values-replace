@@ -166,15 +166,21 @@ const factory = ({
         let preprocessPlugins = [];
         if (preprocessValues) {
           const rootPlugins = rootResult.processor.plugins;
-          const oursPluginIndex = rootPlugins
-            .findIndex((plugin) => plugin.postcssPlugin === PLUGIN);
+          const oursPluginIndex = rootPlugins.findIndex(
+            (plugin) => plugin.postcssPlugin === PLUGIN
+          );
           preprocessPlugins = rootPlugins.slice(0, oursPluginIndex);
         }
 
         const definitionCache = new Map();
         async function walkFile(from, dir, requiredDefinitions) {
           const request = importsAsModuleRequests ? urlToRequest(from) : from;
-          const resolvedFrom = await resolve(concordContext, dir, request, resolveContext);
+          const resolvedFrom = await resolve(
+            concordContext,
+            dir,
+            request,
+            resolveContext
+          );
 
           const cached = definitionCache.get(resolvedFrom);
           if (cached) {
@@ -186,8 +192,9 @@ const factory = ({
             ...preprocessPlugins,
             walkerPlugin(walk, requiredDefinitions, walkFile),
           ];
-          const result = await postcss(plugins)
-            .process(content, { from: resolvedFrom });
+          const result = await postcss(plugins).process(content, {
+            from: resolvedFrom,
+          });
 
           definitionCache.set(resolvedFrom, result.messages[0].value);
 
@@ -197,7 +204,7 @@ const factory = ({
         definitions = await walk(null, walkFile, root, rootResult);
         rootResult.messages.push({
           plugin: PLUGIN,
-          type: 'values',
+          type: "values",
           values: definitions,
         });
       },
@@ -210,6 +217,10 @@ const factory = ({
           // eslint-disable-next-line no-param-reassign
           node.params = replaceValueSymbols(node.params, definitions);
         },
+        container(node) {
+          // eslint-disable-next-line no-param-reassign
+          node.params = replaceValueSymbols(node.params, definitions);
+        },
         value(node) {
           if (noEmitExports) {
             node.remove();
@@ -219,7 +230,10 @@ const factory = ({
       Rule(node) {
         if (replaceInSelectors) {
           // eslint-disable-next-line no-param-reassign
-          node.selector = ICSSUtils.replaceValueSymbols(node.selector, definitions);
+          node.selector = ICSSUtils.replaceValueSymbols(
+            node.selector,
+            definitions
+          );
         }
       },
     };
